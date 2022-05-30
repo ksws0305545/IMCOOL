@@ -1,0 +1,21 @@
+1. 创建索引
+CREATE INDEX [INDEX_NAME] ON [TABLE_NAME]([FIELD_NAME])
+
+2. 检查锁表并强制关闭应用
+SELECT * FROM SYSIBMADM.LOCKS_HELD
+CALL SYSPROC.ADMIN_CMD('FORCE APPLICATION([APP_NUMBER])')
+
+3. 检查表空间
+SELECT * FROM SYSIBMADM.TBSP_UTILIZATION
+
+4.  检查执行计划
+SELECT BNAME, PKGNAME, BSCHEMA
+FROM syscat.packagedep
+WHERE btype='T'
+  AND pkgname in(
+    select bname from sysibm.sysdependencies where dname in(
+      select specificname from syscat.procedures where procname='P_OCS_ACTIVE_UPDATE' AND PROCSCHEMA='PDW'
+    )
+  )
+--服务端
+db2 rebind package pdw.P8414315
